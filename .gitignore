@@ -1,0 +1,7 @@
+target/
+Cargo.lock
+
+*.exe
+*.txt
+*.csv
+*.bin
