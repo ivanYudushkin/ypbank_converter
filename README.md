@@ -7,26 +7,20 @@
 
 `ypbank_converter` — Инструмент, который позволяет менять формат данных по банковским транзакциям, а так же сравнивать тва формата на идентичность 
 
-### Поддерживаемые форматы
+## Поддерживаемые форматы
 
 - **YPBankCsv** 
 - **YPBankText** 
 - **YPBankBin** 
 
-### Запуск
+## Запуск
+
+### Converter
+
+Конвертация файла
 
 ```bash
-cargo run
-```
-
-### Команды
-
-После запуска откроется интерактивная консоль. Доступны следующие команды:
-
-#### Конвертация файла
-
-```
-ypbank_converter <input_file> <input_format> <output_format>
+cargo run --bin converter <input_file> <input_format> <output_format>
 ```
 
 **Параметры:**
@@ -35,16 +29,15 @@ ypbank_converter <input_file> <input_format> <output_format>
 - `output_format` — целевой формат (`csv`, `text`, `bin`)
 
 **Пример:**
-```
-ypbank_converter records.csv csv bin
+```bash
+cargo run --bin converter records.csv csv bin
 ```
 
 Результат будет сохранен в файл с тем же именем, но с расширением целевого формата (например, `records.bin`).
 
-#### Сравнение файлов
-
-```
-ypbank_comparer <file1> <format1> <file2> <format2>
+### Comparer
+```bash
+cargo run --bin comparer <file1> <format1> <file2> <format2>
 ```
 
 **Параметры:**
@@ -54,33 +47,31 @@ ypbank_comparer <file1> <format1> <file2> <format2>
 - `format2` — формат второго файла (`csv`, `text`, `bin`)
 
 **Пример:**
-```
-ypbank_comparer records.csv csv records.bin bin
+```bash
+cargo run --bin comparer records.csv csv records.bin bin
 ```
 
 Команда выведет результат сравнения: `TRUE` если файлы идентичны, `FALSE` если различаются.
 
-#### Выход
-
+### CLI
+```bash
+cargo run
 ```
+**Поддерживаемые команды**
+
+Конвертация файла
+```bash
+converter <input_file> <input_format> <output_format>
+```
+
+Сравнение файлов с транзакциями
+```bash
+comparer <file1> <format1> <file2> <format2>
+```
+
+Выход
+```bash
 exit
-```
-
-## Структура проекта
-
-```
-src/
-├── main.rs              # Точка входа, CLI интерфейс
-├── converter.rs         # Логика конвертации между форматами
-├── comparer.rs          # Логика сравнения файлов
-├── transaction.rs       # Модель данных транзакции
-├── error.rs             # Обработка ошибок
-├── helpers.rs           # Вспомогательные функции
-└── formats/
-    ├── mod.rs           # Модуль форматов
-    ├── csv_format.rs    # Реализация YPBankCsv формата
-    ├── txt_format.rs    # Реализация YPBankText формата
-    └── bin_format.rs    # Реализация YPBankBin формата
 ```
 
 ## Формат данных транзакции
@@ -103,21 +94,21 @@ src/
 ### Конвертация CSV в Binary
 
 ```
-> ypbank_converter transactions.csv csv bin
+cargo run --bin converter transactions.csv csv bin
 Конвертация прошла успешно
 ```
 
 ### Конвертация Binary в Text
 
 ```
-> ypbank_converter transactions.bin bin text
+cargo run --bin converter transactions.bin bin text
 Конвертация прошла успешно
 ```
 
 ### Проверка идентичности файлов
 
 ```
-> ypbank_comparer transactions.csv csv transactions.bin bin
+cargo run --bin comparer transactions.csv csv transactions.bin bin
 ====================================================
 Результат проверки идентичности двух файлов
 Файл1: transactions.csv, Формат: csv

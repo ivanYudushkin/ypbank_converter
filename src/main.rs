@@ -1,25 +1,15 @@
-mod formats; 
-mod error;
-mod converter;
-mod comparer;
-mod helpers;
-mod transaction;
-
+use ypbank_converter::{converter, comparer};
 use std::io::{self, BufRead, Write};
-use converter::converter;
-use comparer::comparer;
-
 use colored::*;
-
 
 fn main() -> io::Result<()>  {
     //CLI
     println!("{}", "=== CLI ===".blue());
     println!("{}", "Команды:".blue());
-    println!("{}", "ypbank_converter <input_file> <input_format> <output_format>     - конвертация файла в другой тип".blue());
-    println!("{}", "ypbank_comparer <file1> <format1> <file2> <format2>              - проверка, что файлы одинаковые".blue());
+    println!("{}", "converter <input_file> <input_format> <output_format>     - конвертация файла в другой тип".blue());
+    println!("{}", "comparer <file1> <format1> <file2> <format2>              - проверка, что файлы одинаковые".blue());
     println!("{}", "Поддерживаемые форматы:".blue());
-    println!("{}", "  -txt".blue());
+    println!("{}", "  -text".blue());
     println!("{}", "  -csv".blue());
     println!("{}", "  -bin".blue());
 
@@ -46,7 +36,7 @@ fn main() -> io::Result<()>  {
 
         //Команда converter
         match args[0] {
-            "ypbank_converter" => {
+            "converter" => {
                 if args.len() == 4 {
                     match converter(args[1], args[2], args[3]) {
                         Ok(_) => println!("{}", "Конвертация прошла успешно".green()),
@@ -57,11 +47,11 @@ fn main() -> io::Result<()>  {
                 //Обработка неправильного формата ввода
                 else {
                     eprintln!("{}", "Использование:".yellow());
-                    eprintln!("{}", "ypbank_converter <input_file> <input_format> <output_format>".yellow());
+                    eprintln!("{}", "converter <input_file> <input_format> <output_format>".yellow());
                 }
             },
             //Команда comparer
-            "ypbank_comparer" => {
+            "comparer" => {
                 if args.len() == 5 {
                     match comparer(args[1], args[2], args[3], args[4]) {
                         Ok(_) => print!(""),
@@ -72,7 +62,7 @@ fn main() -> io::Result<()>  {
                 //Обработка неправильного формата ввода
                 else {
                     eprintln!("{}", "Использование:".yellow());
-                    eprintln!("{}", "ypbank_comparer <file1> <format1> <file2> <format2>".yellow());
+                    eprintln!("{}", "comparer <file1> <format1> <file2> <format2>".yellow());
                 }
             },
             "exit" => break,

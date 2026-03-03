@@ -43,7 +43,23 @@ impl Transaction {
     
 }
 
-//Чтение источника соответствующего формату YPBankText и приведение его к типу Vec<Transaction>
+///Чтение источника соответствующего формату YPBankText и приведение его к типу `Vec<Transaction>`
+/// 
+/// # Аргументы:
+/// 
+/// * `reader` - читатель реализующий трейт `std::io::Read`
+/// 
+/// # Возвращает
+/// * `Ok(Vec<Transaction>)` - вектор транзакций, прочитанных из источника
+/// * `Err` - при ошибке чтения или парсинга
+/// 
+/// # Ошибки
+/// 
+/// Функция может вернуть ошибку в следующих случаях:
+///
+/// - Ошибка чтения данных из источника
+/// - Несоответствие формата файла 
+/// - Ошибка парсинга бинарных данных
 pub fn from_read<R: std::io::Read>(reader: &mut R) -> Result<Vec<Transaction>, std::io::Error> {
     //Инициализация ридера
     let buf_reader = BufReader::new(reader);
@@ -133,7 +149,22 @@ pub fn from_read<R: std::io::Read>(reader: &mut R) -> Result<Vec<Transaction>, s
 
 }
 
-//Пишем данные в формат YPBankText
+///Пишет данные в формат YPBankText
+/// 
+/// # Аргументы:
+/// 
+/// * `bin_transactions` - вектор транзакций для записи
+/// * `writer` - писатель реализующий трейт `std::io::Write``
+/// 
+/// # Возвращает
+/// * `Ok(())` - при успешной записи всех транзакций
+/// * `Err` - при ошибке записи данных
+/// 
+/// # Ошибки
+/// 
+/// Функция может вернуть ошибку в следующих случаях:
+///
+/// - Ошибка записи данных в целевой источник
 pub fn write_to<W: std::io::Write>(txt_transactions: Vec<Transaction>,mut writer: &mut W) -> std::io::Result<()> {
     //Для каждой транзакции в векторе вызываем write_transaction_txt
     for mut trans in txt_transactions {

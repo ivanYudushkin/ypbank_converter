@@ -41,7 +41,23 @@ impl Transaction {
     }
 }
 
-//Чтение источника соответствующего формату YPBankCsv и приведение его к типу Vec<Transaction>
+///Чтение источника соответствующего формату YPBankCsv и приведение его к типу `Vec<Transaction>`
+/// 
+/// # Аргументы:
+/// 
+/// * `reader` - читатель реализующий трейт `std::io::Read`
+/// 
+/// # Возвращает
+/// * `Ok(Vec<Transaction>)` - вектор транзакций, прочитанных из источника
+/// * `Err` - при ошибке чтения или парсинга
+/// 
+/// # Ошибки
+/// 
+/// Функция может вернуть ошибку в следующих случаях:
+///
+/// - Ошибка чтения данных из источника
+/// - Несоответствие формата файла 
+/// - Ошибка парсинга бинарных данных
 pub fn from_read<R: std::io::Read>(reader: &mut R) -> Result<Vec<Transaction>, std::io::Error> {
     //Инициализация ридера
     let buf_reader = BufReader::new(reader);
@@ -65,6 +81,12 @@ pub fn from_read<R: std::io::Read>(reader: &mut R) -> Result<Vec<Transaction>, s
         let mut transaction = Transaction::new();
         //Парсим по разделителю
         let parts:Vec<&str> = line.split(",").collect();
+
+        //Пропускаю некорректные строки и вывожу предупреждение
+        if parts.len() < 8 {
+            eprintln!("{}", format!("Предупреждение: некорректная запись транзакции, длина строки: {}. Номер транзакции: {}", parts.len().to_string().yellow().bold(), num_transaction.to_string().yellow().bold()).yellow());
+            continue;
+        }
         //Пытаемся вытащить инфо о транзакции
         transaction.tx_id = parse_u64(parts[0]);
         transaction.tx_type = match parts[1].to_lowercase().trim() {
@@ -99,13 +121,35 @@ pub fn from_read<R: std::io::Read>(reader: &mut R) -> Result<Vec<Transaction>, s
 
 }
 
-//Пишем данные в формат YPBankCsv
+///Пишет данные в формат YPBankCsv
+/// 
+/// # Аргументы:
+/// 
+/// * `bin_transactions` - вектор транзакций для записи
+/// * `writer` - писатель реализующий трейт `std::io::Write``
+/// 
+/// # Возвращает
+/// * `Ok(())` - при успешной записи всех транзакций
+/// * `Err` - при ошибке записи данных
+/// 
+/// # Ошибки
+/// 
+/// Функция может вернуть ошибку в следующих случаях:
+///
+/// - Ошибка записи данных в целевой источник
 pub fn write_to<W: std::io::Write>(csv_transactions: Vec<Transaction>,mut writer: &mut W) -> std::io::Result<()> {
     //Шапка CSV
     writeln!(writer, "TX_ID,TX_TYPE,FROM_USER_ID,TO_USER_ID,AMOUNT,TIMESTAMP,STATUS,DESCRIPTION")?;
-    //Пишекм каждую транзакцию
+    //Пишем каждую транзакцию
     for mut trans in csv_transactions {
-        trans.write_transaction_csv(&mut writer)?
+        //Проверка, что у транзакции есть все атрибуты
+        if trans.is_complete() {
+            trans.write_transaction_csv(&mut writer)?
+        }
+        else {
+            eprintln!("{}", "Предупреждение: Транзакция не имеет всех атрибутов. Запись пропущена".yellow());
+            continue;
+        }
     }
 
     Ok(())
@@ -207,5 +251,46 @@ mod tests {
         assert!(output.contains("163303698012312"));
         assert!(output.contains("FAILURE"));
         assert!(output.contains("\"Test transaction 2\""));
+    }
+
+    #[test]
+    fn test_from_read_with_bad_record() {
+        let input = 
+    "TX_ID,TX_TYPE,FROM_USER_ID,TO_USER_ID,AMOUNT,TIMESTAMP,STATUS,DESCRIPTION
+    1000000000000000,DEPOSIT,0,9223372036854775807,100,1633036860000,FAILURE,\"Record number 1\"
+    1000000000000001,TRANSFER,9223372036854775807,200,1633036920000,PENDING,\"Record number 2\"
+
+
+
+    1000000000000002,WITHDRAWAL,599094029349995112,0,300,1633036980000,TEST,\"Record number 3\"";
+
+        let mut reader = std::io::Cursor::new(input);
+        let vec_transaction = from_read(&mut reader).unwrap();
+
+        assert_eq!(vec_transaction.len(), 2);
+
+    }
+
+    #[test]
+    fn test_write_to_bad_record() {
+        let mut transaction1 = Transaction::new();
+        transaction1.tx_id = Some(100);
+        transaction1.tx_type = Some(TransactionType::DEPOSIT);
+        transaction1.from_user_id = None;
+        transaction1.to_user_id = Some(2);
+        transaction1.amount = Some(1000);
+        transaction1.timestamp = Some(1633036860000);
+        transaction1.status = Some(StatusType::SUCCESS);
+        transaction1.description = Some("Test transaction 1".to_string());
+
+        let mut buffer = Vec::new();
+        write_to(vec![transaction1], &mut buffer).unwrap();
+
+        let output = String::from_utf8(buffer).unwrap();
+
+        let mut reader = std::io::Cursor::new(output);
+        let vec_result = from_read(&mut reader).unwrap();
+
+        assert!(vec_result.is_empty());
     }
 }

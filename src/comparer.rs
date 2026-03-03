@@ -1,13 +1,38 @@
 use crate::error::unsupported_file_type;
 use crate::formats::{csv_format, txt_format, bin_format};
-use colored::*;
 
 use std::io;
 use std::fs::File;
 use std::io::BufReader;
 
-//Функция которая преобразует исходные форматы в Vec<Transaction> и сравнивает вектора
-pub fn comparer(file1: &str, format1: &str, file2: &str, format2: &str) -> io::Result<()> {
+///Функция читает транзакции из обоих файлов в промежуточное представление `Vec<Transaction>` и сравнивает два вектора на идентичность
+/// 
+/// # Поддерживаемые типы:
+/// 
+/// * csv
+/// * text
+/// * bin
+/// 
+/// # Аргументы:
+/// 
+/// * `file1` - путь к первому файлу
+/// * `format1` - формат первого файла
+/// * `file2` - путь до второго файла
+/// * `format2` - формат второго файла
+/// 
+/// # Возвращает
+/// * `Ok(true)` - если файлы идентичны
+/// * `Ok(false)` - если файлы разные
+/// 
+/// # Ошибки
+/// 
+/// Функция может вернуть ошибку в следующих случаях:
+///
+/// - Один из файлов не найден
+/// - Неподдерживаемый формат файла
+/// - Ошибка чтения файла
+/// - Несоответствие формата файла указанному типу
+pub fn comparer(file1: &str, format1: &str, file2: &str, format2: &str) -> io::Result<bool> {
     //Ридер для 1-го источника
     let f1 = File::open(file1)?;
     let mut reader1 = BufReader::new(f1);
@@ -28,28 +53,9 @@ pub fn comparer(file1: &str, format1: &str, file2: &str, format2: &str) -> io::R
         "bin" => bin_format::from_read(&mut reader2)?,
         _ => return Err(unsupported_file_type(file2, format2))
     };
-    //Вывод в консоль если вектора одинаковые
-    if read_transactions1 == read_transactions2 {
-        println!("{}", "====================================================".blue());
-        println!("{}", "Результат проверки идентичности двух файлов".blue());
-        println!("{}", format!("Файл1: {}, Формат: {}", file1.blue().bold(), format1.blue().bold()).blue());
-        println!("{}", format!("Файл2: {}, Формат: {}", file2.blue().bold(), format2.blue().bold()).blue());
-        println!("{}", "TRUE".green().bold());
-        println!("{}", format!("The transaction records in {} and {} are identical.", file1.blue().bold(), file2.blue().bold()).blue());
-        println!("{}", "====================================================".blue());
-    }
-    //Вывод в консоль если вектора не одинаковые
-    else {
-        println!("{}", "====================================================".blue());
-        println!("Результат проверки идентичности двух файлов");
-        println!("{}", format!("Файл1: {}, Формат: {}", file1.blue().bold(), format1.blue().bold()).blue());
-        println!("{}", format!("Файл2: {}, Формат: {}", file2.blue().bold(), format2.blue().bold()).blue());
-        println!("{}", "FALSE".red().bold());
-        println!("{}", format!("The transaction records in {} and {} are not identical.", file1.blue().bold(), file2.blue().bold()).blue());
-        println!("{}", "====================================================".blue());
-    }
+    
+    Ok(read_transactions1 == read_transactions2)
 
-    Ok(())
 
 }
 

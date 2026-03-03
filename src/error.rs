@@ -1,6 +1,9 @@
 use std::io;
 use colored::*;
 
+
+
+///Вывод в консоль ошибки о нессответствии формата файла
 pub fn handle_read_error(format: &str, error: io::Error) -> io::Error {
     if error.kind() == io::ErrorKind::InvalidData {
         eprintln!("{}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".red());
@@ -16,6 +19,7 @@ pub fn handle_read_error(format: &str, error: io::Error) -> io::Error {
     }
 }
 
+///Вывод в консоль ошибки о нессответствии типа файла
 pub fn unsupported_file_type(file_name: &str,file_format: &str) -> io::Error {
     eprintln!("{}", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━".red());
     eprintln!("{}", "Ошибка: Неподдерживаемый тип файла".red());
