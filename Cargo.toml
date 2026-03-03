@@ -1,10 +1,13 @@
 [package]
 name = "ypbank_converter"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024" 
 authors = ["ivanyudushkin@yandex.ru"]
 description = "Конвертер и компаратор банковских транзакций для типов: YPBankCsv, YPBankText, YPBankBin"
 repository = "https://github.com/ivanYudushkin/ypbank_converter"
 
+default-run = "ypbank_converter"
+
 [dependencies]
 colored = "3.*"
+clap = { version = "4.*", features = ["derive"] } 
