@@ -1,6 +1,6 @@
 [package]
 name = "ypbank_converter"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024" 
 authors = ["ivanyudushkin@yandex.ru"]
 description = "Конвертер и компаратор банковских транзакций для типов: YPBankCsv, YPBankText, YPBankBin"

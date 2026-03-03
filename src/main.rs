@@ -54,7 +54,8 @@ fn main() -> io::Result<()>  {
             "comparer" => {
                 if args.len() == 5 {
                     match comparer(args[1], args[2], args[3], args[4]) {
-                        Ok(_) => print!(""),
+                        Ok(true) => println!("{}", "Файлы идентичны".green()),
+                        Ok(false) => println!("{}", "Файлы различаются".red()),
                         //Чтобы не было break в случае ошибки
                         Err(e) => eprintln!("{}", e)
                     }
